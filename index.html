@@ -490,14 +490,14 @@ function openTaskModal(taskId,coin,isBasic,type){
     var idx=state.todayPoemIdx[taskId]||(parseInt(today.replace(/-/g,''))%POEMS.length);
     var p=POEMS[idx];
     html='<div class="mheader"><div class="mtitle">📖 今日古诗 <span style="font-size:11px;color:var(--purple);">🔊 点击朗读</span></div><button class="mclose" onclick="closeModal()">✕</button></div>'+
-      '<div class="content-card"><div class="cc-title" onclick="speak(''+p.title+'')" style="cursor:pointer;">'+p.title+' · '+p.author+'</div>'+
-      p.lines.map(function(l,i){return '<div class="cc-body" style="cursor:pointer;line-height:2.2;" onclick="speak(''+l.replace(/'/g,"\\'")+'')">'+l+'<span style="font-size:10px;color:#c9a0dc;display:block;">'+p.pinyin[i]+'</span></div>';}).join('')+
-      '<button class="btn btn-purple btn-sm" onclick="speakAll(''+p.title+'',''+JSON.stringify(p.lines).replace(/'/g,"\\'")+'')" style="margin-top:8px;">🔊 全文朗读</button>'+
+      '<div class="content-card"><div class="cc-title" data-speak="'+escHtml(p.title)+'" style="cursor:pointer;">'+p.title+' · '+p.author+'</div>'+
+      p.lines.map(function(l,i){return '<div class="cc-body" style="cursor:pointer;line-height:2.2;" data-speak="'+escHtml(l)+'">'+l+'<span style="font-size:10px;color:#c9a0dc;display:block;">'+p.pinyin[i]+'</span></div>';}).join('')+
+      '<button class="btn btn-purple btn-sm" data-speakall-title="'+escHtml(p.title)+'" data-speakall-lines="'+escHtml(JSON.stringify(p.lines))+'" style="margin-top:8px;">🔊 全文朗读</button>'+
       '</div><div class="modal-hint">👩‍👧 <b>家长引导</b>：让孩子朗读并背诵古诗。背熟后输入密码确认。</div>'+confirmHTML('背诵完成');
   }else if(type==='chars'){
     var chars=CHARS_6.slice(0,15);
     html='<div class="mheader"><div class="mtitle">✏️ 生字词语 <span style="font-size:11px;color:var(--purple);">🔊 点读</span></div><button class="mclose" onclick="closeModal()">✕</button></div>'+
-      '<div class="char-grid">'+chars.map(function(c){return '<div class="char-card" onclick="speak(''+c.char+'')"><span style="font-size:10px;float:right;opacity:.5;">🔊</span><div class="big-char">'+c.char+'</div><div class="cc-pinyin">'+c.pinyin+'</div><div class="cc-words">'+c.words+'</div></div>';}).join('')+'</div>'+
+      '<div class="char-grid">'+chars.map(function(c){return '<div class="char-card" data-speak="'+escHtml(c.char)+'"><span style="font-size:10px;float:right;opacity:.5;">🔊</span><div class="big-char">'+c.char+'</div><div class="cc-pinyin">'+c.pinyin+'</div><div class="cc-words">'+c.words+'</div></div>';}).join('')+'</div>'+
       '<div class="modal-hint">👩‍👧 <b>家长引导</b>：让孩子认读生字、说出拼音和组词。完成后输入密码确认。</div>'+confirmHTML('认读完成');
   }else if(type==='math'){
     var qs=genMathQs(15);
@@ -507,7 +507,7 @@ function openTaskModal(taskId,coin,isBasic,type){
   }else if(type==='english'){
     var ws=ENGLISH_WORDS.slice((parseInt(today.replace(/-/g,''))+taskId.charCodeAt(0))%10,20);
     html='<div class="mheader"><div class="mtitle">🌍 英语单词 <span style="font-size:11px;color:var(--purple);">🔊 点读</span></div><button class="mclose" onclick="closeModal()">✕</button></div>'+
-      ws.map(function(w){return '<div class="word-card" onclick="speak(''+w.en+'')"><div class="en">'+w.en+'</div><div class="zh">'+w.zh+'</div></div>';}).join('')+
+      ws.map(function(w){return '<div class="word-card" data-speak="'+escHtml(w.en)+'"><div class="en">'+w.en+'</div><div class="zh">'+w.zh+'</div></div>';}).join('')+
       '<div class="modal-hint">👩‍👧 <b>家长引导</b>：点击单词听发音，让孩子跟读并说出中文意思。完成后输入密码确认。</div>'+confirmHTML('单词完成');
   }else{
     html='<div class="mheader"><div class="mtitle">✅ 确认任务</div><button class="mclose" onclick="closeModal()">✕</button></div>'+
@@ -515,6 +515,20 @@ function openTaskModal(taskId,coin,isBasic,type){
   }
   document.getElementById('modalContent').innerHTML=html;
   document.getElementById('taskModal').style.display='flex';
+  // 事件委托：处理 speak 和 speakAll 点击
+  setTimeout(function(){
+    var mc=document.getElementById('modalContent');
+    mc.addEventListener('click',function(e){
+      var el=e.target.closest('[data-speak]');
+      if(el){ speak(el.getAttribute('data-speak')); return; }
+      var sa=document.querySelector('[data-speakall-title]');
+      if(sa && e.target.closest('[data-speakall-title]')){
+        var title=sa.getAttribute('data-speakall-title');
+        var lines=JSON.parse(sa.getAttribute('data-speakall-lines')||'[]');
+        speakAll(title,lines);
+      }
+    });
+  },50);
 }
 
 function confirmHTML(label){
@@ -687,6 +701,7 @@ function getMandarinVoice(){
   var v=voices.find(function(v){return v.lang==='zh-CN';})||voices.find(function(v){return v.lang.indexOf('zh-CN')===0;})||voices.find(function(v){return v.lang.indexOf('zh')===0&&v.lang.indexOf('HK')===-1;});
   if(v) cachedVoice=v; return v;
 }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function speak(text){
   if(!speechSynth) return;
   speechSynth.cancel();
@@ -694,11 +709,12 @@ function speak(text){
   var mv=getMandarinVoice(); if(mv) u.voice=mv;
   speechSynth.speak(u);
 }
-function speakAll(title,linesJson){
+function speakAll(title,lines){
   if(!speechSynth) return;
   speechSynth.cancel();
-  var lines; try{ lines=JSON.parse(linesJson); }catch(e){ lines=[title]; }
-  var u=new SpeechSynthesisUtterance(title+'。'+lines.join('。')); u.lang='zh-CN'; u.rate=0.8;
+  var txt=title+'。';
+  if(Array.isArray(lines)) txt+=lines.join('。'); else txt+=title;
+  var u=new SpeechSynthesisUtterance(txt); u.lang='zh-CN'; u.rate=0.8;
   var mv=getMandarinVoice(); if(mv) u.voice=mv;
   speechSynth.speak(u);
 }
@@ -733,37 +749,53 @@ function renderTasks(){
 
 function taskHTML(t,isBasic){
   var done=state.doneTasks[t.id+'_'+today];
-  return '<li class="task-item'+(done?' done':'')+'" onclick="openTaskModal(''+t.id+'','+t.coin+','+isBasic+',''+t.type+'')"><div class="status-icon">'+(done?'✓':'')+'</div><div class="task-info"><div class="tname">'+t.name+'</div><div class="tstatus '+(done?'ok':'pending')+'">'+(done?'✅ 已完成':'⏳ 点击进入')+'</div></div><div class="task-coin">+'+t.coin+'⭐</div><div class="arrow">›</div></li>';
+  return '<li class="task-item'+(done?' done':'')+'" data-taskid="'+t.id+'" data-coin="'+t.coin+'" data-isbasic="'+isBasic+'" data-type="'+t.type+'"><div class="status-icon">'+(done?'✓':'')+'</div><div class="task-info"><div class="tname">'+t.name+'</div><div class="tstatus '+(done?'ok':'pending')+'">'+(done?'✅ 已完成':'⏳ 点击进入')+'</div></div><div class="task-coin">+'+t.coin+'⭐</div><div class="arrow">›</div></li>';
 }
 
 function renderCustomTasks(){
   document.getElementById('customTasks').innerHTML=state.customTasks.map(function(t,i){
     var done=state.doneTasks[t.id+'_'+today];
-    return '<div class="task-item'+(done?' done':'')+'" style="display:flex;align-items:center;gap:8px;" onclick="openTaskModal(''+t.id+'','+t.coin+',false,'custom')"><div class="status-icon">'+(done?'✓':'')+'</div><div class="task-info"><div class="tname">'+t.name+'</div><div class="tstatus '+(done?'ok':'pending')+'">'+(done?'✅':'⏳')+'</div></div><div class="task-coin">+'+t.coin+'⭐</div><span onclick="event.stopPropagation();removeCustomTask('+i+')" style="color:var(--pink);cursor:pointer;">✕</span></div>';
+    return '<div class="task-item'+(done?' done':'')+'" style="display:flex;align-items:center;gap:8px;" data-taskid="'+t.id+'" data-coin="'+t.coin+'" data-isbasic="false" data-type="custom"><div class="status-icon">'+(done?'✓':'')+'</div><div class="task-info"><div class="tname">'+t.name+'</div><div class="tstatus '+(done?'ok':'pending')+'">'+(done?'✅':'⏳')+'</div></div><div class="task-coin">+'+t.coin+'⭐</div><span data-remove-custom="'+i+'" style="color:var(--pink);cursor:pointer;">✕</span></div>';
   }).join('');
 }
 
 function renderShop(){
   document.getElementById('shopGrid').innerHTML=SHOP_ITEMS.map(function(item){
     var owned=state.ownedItems[item.id];
-    return '<div class="shop-item'+(owned?' owned':'')+'"><div class="sicon">'+item.icon+'</div><div class="sname">'+item.name+'</div><div class="seffect">'+item.effect+'</div><div class="sprice">'+item.price+'⭐</div>'+(owned?'<div style="color:var(--mint);font-weight:700;font-size:11px;">✅ 已拥有</div>':'<button class="btn btn-pink buy-btn" onclick="event.stopPropagation();buyItem(''+item.id+'')">🛍️ 购买</button>')+'</div>';
+    return '<div class="shop-item'+(owned?' owned':'')+'"><div class="sicon">'+item.icon+'</div><div class="sname">'+item.name+'</div><div class="seffect">'+item.effect+'</div><div class="sprice">'+item.price+'⭐</div>'+(owned?'<div style="color:var(--mint);font-weight:700;font-size:11px;">✅ 已拥有</div>':'<button class="btn btn-pink buy-btn" data-buy-item="'+item.id+'">🛍️ 购买</button>')+'</div>';
   }).join('');
 }
 
 function renderPoems(){
   var html='';
   POEMS.forEach(function(p){
-    html+='<div style="background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,.03);"><div style="font-weight:700;color:var(--pink);margin-bottom:4px;cursor:pointer;" onclick="speak(''+p.title+'')">🔊 '+p.title+' · '+p.author+'</div><div style="font-size:13px;line-height:2.2;">'+p.lines.map(function(l){return '<span class="learn-poem-line" onclick="speak(''+l.replace(/'/g,"\\'")+'')">'+l+'</span>';}).join('<br>')+'<br><button class="btn btn-purple btn-sm" style="margin-top:4px;font-size:10px;padding:3px 10px;" onclick="speakAll(''+p.title+'',''+JSON.stringify(p.lines).replace(/'/g,"\\'")+'')">🔊 全文朗读</button></div></div>';
+    html+='<div style="background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,.03);"><div style="font-weight:700;color:var(--pink);margin-bottom:4px;cursor:pointer;" data-speak="'+escHtml(p.title)+'">🔊 '+p.title+' · '+p.author+'</div><div style="font-size:13px;line-height:2.2;">'+p.lines.map(function(l){return '<span class="learn-poem-line" data-speak="'+escHtml(l)+'">'+l+'</span>';}).join('<br>')+'<br><button class="btn btn-purple btn-sm" style="margin-top:4px;font-size:10px;padding:3px 10px;" data-speakall-title="'+escHtml(p.title)+'" data-speakall-lines="'+escHtml(JSON.stringify(p.lines))+'">🔊 全文朗读</button></div></div>';
   });
   document.getElementById('poemList').innerHTML=html;
+  // 事件委托
+  document.getElementById('poemList').onclick=function(e){
+    var el=e.target.closest('[data-speak]');
+    if(el){ speak(el.getAttribute('data-speak')); return; }
+    var sa=e.target.closest('[data-speakall-title]');
+    if(sa){
+      var title=sa.getAttribute('data-speakall-title');
+      var lines=JSON.parse(sa.getAttribute('data-speakall-lines')||'[]');
+      speakAll(title,lines);
+    }
+  };
 }
 
 function renderWords(){
   var html='';
   ENGLISH_WORDS.forEach(function(w){
-    html+='<div class="word-card" style="display:inline-block;margin:3px;cursor:pointer;" onclick="speak(''+w.en+'')"><div class="en">'+w.en+'</div><div class="zh">'+w.zh+'</div></div>';
+    html+='<div class="word-card" style="display:inline-block;margin:3px;cursor:pointer;" data-speak="'+escHtml(w.en)+'"><div class="en">'+w.en+'</div><div class="zh">'+w.zh+'</div></div>';
   });
   document.getElementById('wordList').innerHTML=html;
+  // 事件委托
+  document.getElementById('wordList').onclick=function(e){
+    var el=e.target.closest('[data-speak]');
+    if(el){ speak(el.getAttribute('data-speak')); }
+  };
 }
 
 function renderSummary(){
@@ -800,6 +832,34 @@ function toastMsg(msg){
   var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
   clearTimeout(toastTimer); toastTimer=setTimeout(function(){el.classList.remove('show');},1800);
 }
+
+// ============ 全局事件委托 ============
+// 处理 task-item 点击（打开任务弹窗）
+document.addEventListener('click',function(e){
+  var taskEl=e.target.closest('[data-taskid]');
+  if(taskEl){
+    var taskId=taskEl.getAttribute('data-taskid');
+    var coin=parseInt(taskEl.getAttribute('data-coin'))||5;
+    var isBasic=taskEl.getAttribute('data-isbasic')==='true';
+    var type=taskEl.getAttribute('data-type')||'';
+    openTaskModal(taskId,coin,isBasic,type);
+    return;
+  }
+  // 处理购买按钮
+  var buyEl=e.target.closest('[data-buy-item]');
+  if(buyEl){
+    e.stopPropagation();
+    buyItem(buyEl.getAttribute('data-buy-item'));
+    return;
+  }
+  // 处理删除自定义任务
+  var rmEl=e.target.closest('[data-remove-custom]');
+  if(rmEl){
+    e.stopPropagation();
+    removeCustomTask(parseInt(rmEl.getAttribute('data-remove-custom')));
+    return;
+  }
+});
 
 // ============ 事件 ============
 document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){switchTab(t.dataset.tab);});});
