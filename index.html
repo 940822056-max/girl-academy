@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="元气少女学院">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#ffb7c5">
+<title>💖 元气少女养成学院 · 5升6学习台</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23ffb7c5' rx='20'/><text x='50' y='65' text-anchor='middle' font-size='50'>💖</text></svg>">
+<style>
+:root{
+  --pink:#ff85a2;--pink2:#ffb7c5;--pink3:#ffe0e6;--purple:#c9a0dc;--purple2:#e8d5f5;
+  --gold:#f5a623;--gold2:#ffe4b5;--mint:#a8e6cf;--mint2:#d4f5e8;
+  --bg:#fff5f7;--card:#ffffff;--text:#5c3d4a;--text2:#9b7d8a;
+  --star:#f5a623;--wisdom:#7c5ce7;--vitality:#ff6b6b;--talent:#48dbfb;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Heiti SC",sans-serif;
+  background:linear-gradient(180deg,#fff0f3 0%,#fff5f7 30%,#f8e8ff 100%);
+  color:var(--text);min-height:100vh;padding-bottom:90px;overscroll-behavior:none;
+}
+
+/* 头部 */
+.topbar{
+  background:linear-gradient(135deg,var(--pink),var(--purple));
+  padding:16px 16px 12px;text-align:center;position:sticky;top:0;z-index:10;
+  box-shadow:0 2px 20px rgba(255,133,162,.3);
+}
+.topbar .academy-name{font-size:12px;color:rgba(255,255,255,.8);letter-spacing:3px;}
+.topbar h1{font-size:20px;color:#fff;letter-spacing:2px;margin:4px 0 2px;text-shadow:0 2px 8px rgba(0,0,0,.1);}
+.topbar .player-bar{display:flex;justify-content:center;gap:12px;margin-top:6px;font-size:11px;flex-wrap:wrap;}
+.topbar .player-bar span{background:rgba(255,255,255,.25);padding:3px 10px;border-radius:12px;color:#fff;}
+.topbar .player-bar input{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.5);color:#fff;width:80px;font-size:11px;text-align:center;outline:none;}
+.topbar .player-bar input::placeholder{color:rgba(255,255,255,.5);}
+
+/* 少女卡片 */
+.girl-card{
+  background:var(--card);border-radius:16px;padding:14px;margin:12px 14px;
+  box-shadow:0 4px 20px rgba(255,133,162,.12);
+  display:flex;align-items:center;gap:14px;
+}
+.girl-avatar{
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,var(--pink2),var(--purple2));
+  display:flex;align-items:center;justify-content:center;font-size:36px;
+  flex-shrink:0;box-shadow:0 4px 16px rgba(255,133,162,.25);
+}
+.girl-info{flex:1;}
+.girl-info .girl-name{font-size:16px;font-weight:800;color:var(--pink);margin-bottom:4px;}
+.girl-info .girl-level{font-size:11px;color:var(--text2);margin-bottom:6px;}
+.girl-attr{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;font-size:10px;}
+.attr-row{display:flex;align-items:center;gap:4px;}
+.attr-icon{font-size:14px;}
+.attr-bar-wrap{flex:1;height:5px;background:#f0e0e8;border-radius:3px;overflow:hidden;}
+.attr-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
+
+/* 星光币 */
+.star-bar{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin:8px 14px;padding:10px;background:linear-gradient(135deg,var(--gold2),#fff8e1);
+  border-radius:12px;box-shadow:0 2px 12px rgba(245,166,35,.15);
+}
+.star-bar .star-icon{font-size:28px;animation:starTwinkle 2s ease infinite;}
+@keyframes starTwinkle{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.star-bar .star-val{font-size:24px;font-weight:900;color:var(--star);}
+.star-bar .star-label{font-size:11px;color:var(--text2);}
+
+/* 标签页 */
+.tabs{display:flex;gap:0;padding:0 10px;overflow-x:auto;}
+.tab{flex:1;min-width:50px;text-align:center;padding:10px 2px;font-size:10px;color:var(--text2);border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;transition:all .2s;}
+.tab.active{color:var(--pink);border-bottom-color:var(--pink);font-weight:700;}
+.tab .tabicon{font-size:18px;display:block;margin-bottom:2px;}
+
+/* 面板 */
+.panel{display:none;padding:10px 14px;}
+.panel.active{display:block;}
+
+/* 任务列表 */
+.task-list{list-style:none;}
+.task-item{
+  display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);border-radius:12px;
+  margin-bottom:8px;box-shadow:0 2px 12px rgba(0,0,0,.04);cursor:pointer;transition:all .2s;
+  border-left:4px solid var(--pink2);
+}
+.task-item:active{transform:scale(.98);}
+.task-item.done{opacity:.6;border-left-color:var(--mint);background:#fafff9;}
+.task-item .status-icon{width:28px;height:28px;border-radius:50%;border:2px solid var(--pink2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;}
+.task-item.done .status-icon{background:var(--mint);border-color:var(--mint);color:#fff;}
+.task-item .task-info{flex:1;min-width:0;}
+.task-item .tname{font-size:13px;font-weight:600;}
+.task-item .tstatus{font-size:10px;margin-top:2px;}
+.task-item .tstatus.pending{color:var(--pink);}
+.task-item .tstatus.ok{color:var(--mint);}
+.task-item .task-coin{font-size:13px;font-weight:800;color:var(--star);flex-shrink:0;}
+.task-item .arrow{color:var(--text2);font-size:16px;flex-shrink:0;}
+
+.section-title{font-size:13px;font-weight:800;color:var(--purple);padding:8px 0 6px;border-bottom:2px dotted var(--pink2);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.section-title .badge{font-size:9px;padding:2px 8px;border-radius:8px;}
+.badge-basic{color:var(--vitality);background:#ffe0e0;}
+.badge-adv{color:var(--star);background:var(--gold2);}
+.badge-custom{color:var(--text2);background:#f0e0e8;}
+
+/* 弹窗 */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(92,61,74,.7);z-index:100;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);}
+.modal-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;padding:20px 16px;animation:slideUp .3s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-sheet .mheader{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.modal-sheet .mheader .mtitle{font-size:16px;font-weight:800;color:var(--pink);}
+.modal-sheet .mclose{width:30px;height:30px;border-radius:50%;background:var(--pink3);border:none;color:var(--pink);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+/* 弹窗内容卡片 */
+.content-card{background:var(--pink3);border-radius:12px;padding:16px;margin-bottom:12px;text-align:center;}
+.content-card .cc-title{font-size:16px;font-weight:800;color:var(--pink);margin-bottom:6px;}
+.content-card .cc-body{font-size:14px;line-height:2;color:var(--text);}
+
+.char-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.char-card{background:#fff;border-radius:10px;padding:10px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04);cursor:pointer;transition:all .15s;}
+.char-card:active{transform:scale(.96);background:var(--pink3);}
+.char-card .big-char{font-size:24px;font-weight:900;color:var(--purple);}
+.char-card .cc-pinyin{font-size:10px;color:var(--text2);margin:2px 0;}
+.char-card .cc-words{font-size:10px;color:var(--text);}
+
+.math-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.math-item{background:#fff;border-radius:8px;padding:10px;text-align:center;font-size:15px;font-weight:700;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.04);}
+
+.word-card{background:#fff;border-radius:10px;padding:12px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,.04);cursor:pointer;transition:all .15s;}
+.word-card:active{transform:scale(.97);background:var(--purple2);}
+.word-card .en{font-size:16px;font-weight:700;color:var(--purple);}
+.word-card .zh{font-size:12px;color:var(--text2);}
+
+.modal-hint{background:var(--pink3);border:1px dashed var(--pink);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--pink);margin-bottom:12px;line-height:1.6;}
+
+.confirm-area{text-align:center;padding-top:6px;}
+.confirm-area .parent-check{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
+.confirm-area .parent-check label{font-size:13px;color:var(--text2);}
+.confirm-area .parent-check input{width:80px;background:#f8f0f4;border:1px solid var(--pink2);color:var(--pink);padding:6px 10px;border-radius:8px;font-size:14px;text-align:center;outline:none;}
+
+/* 按钮 */
+.btn{display:inline-block;padding:10px 22px;border-radius:24px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .2s;}
+.btn:active{transform:scale(.96);}
+.btn-pink{background:linear-gradient(135deg,var(--pink),#ff6b8a);color:#fff;}
+.btn-purple{background:linear-gradient(135deg,var(--purple),#b388eb);color:#fff;}
+.btn-gold{background:linear-gradient(135deg,var(--star),#f7b733);color:#fff;}
+.btn-mint{background:linear-gradient(135deg,var(--mint),#6dd5a8);color:#fff;}
+.btn-sm{padding:6px 14px;font-size:12px;}
+.btn-block{display:block;width:100%;text-align:center;}
+.btn-lg{padding:14px 28px;font-size:16px;}
+
+/* 商城 */
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.shop-item{
+  background:var(--card);border-radius:12px;padding:10px;text-align:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);transition:all .2s;
+}
+.shop-item.owned{background:#f0fff4;border:2px solid var(--mint);}
+.shop-item .sicon{font-size:28px;margin-bottom:4px;}
+.shop-item .sname{font-size:13px;font-weight:700;margin-bottom:2px;}
+.shop-item .seffect{font-size:10px;color:var(--text2);margin-bottom:6px;}
+.shop-item .sprice{font-size:12px;font-weight:800;color:var(--star);margin-bottom:6px;}
+.shop-item .buy-btn{padding:5px 14px;font-size:11px;}
+
+/* 强化 */
+.enhance-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.enhance-item{
+  background:var(--card);border-radius:12px;padding:12px;text-align:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);
+}
+.enhance-item .eicon{font-size:32px;margin-bottom:4px;}
+.enhance-item .ecoin{font-size:13px;font-weight:800;color:var(--star);}
+.enhance-item .eeffect{font-size:11px;color:var(--text2);margin:4px 0;}
+
+/* 结算 */
+.settle-card{
+  background:var(--card);border-radius:12px;padding:14px;box-shadow:0 2px 12px rgba(0,0,0,.04);margin-bottom:8px;
+}
+.settle-card .stitle{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--purple);}
+.settle-card .sdesc{font-size:12px;color:var(--text2);line-height:1.6;}
+.settle-card .sactions{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;}
+
+/* 弹窗 */
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(92,61,74,.7);z-index:100;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.overlay-box{background:var(--card);border:2px solid var(--pink);border-radius:16px;padding:20px;text-align:center;max-width:320px;width:90%;}
+.overlay-box h2{color:var(--pink);font-size:18px;margin-bottom:8px;}
+.overlay-box p{font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.6;}
+
+/* 胜利弹窗 */
+.victory-box{
+  background:linear-gradient(180deg,#fff0f5 0%,#fff 100%);border:3px solid var(--pink);
+  border-radius:20px;padding:24px 18px;text-align:center;max-width:360px;width:92%;
+  animation:victoryPop .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes victoryPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.victory-box h2{color:var(--pink);font-size:20px;margin:8px 0 4px;}
+.victory-box .v-icon{font-size:56px;animation:iconBounce .6s ease infinite alternate;}
+@keyframes iconBounce{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+.v-reward{display:flex;align-items:center;gap:10px;background:var(--pink3);border:2px dashed var(--pink);border-radius:12px;padding:12px;margin:12px 0;}
+.v-reward-icon{font-size:36px;flex-shrink:0;}
+.v-reward-text{font-size:13px;color:var(--text);text-align:left;line-height:1.6;}
+.v-timer{font-size:28px;font-weight:900;color:var(--pink);letter-spacing:2px;margin:8px 0;font-family:monospace;}
+.v-timer.running{color:var(--mint);animation:timerPulse 1s ease infinite;}
+@keyframes timerPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.v-actions{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.v-tip{font-size:11px;color:var(--text2);margin-top:10px;padding-top:8px;border-top:1px solid var(--pink3);}
+
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--purple);color:#fff;padding:8px 20px;border-radius:20px;font-weight:700;font-size:13px;z-index:200;pointer-events:none;opacity:0;transition:opacity .3s;}
+.toast.show{opacity:1;}
+
+/* 底部导航 */
+.bottombar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--pink3);display:flex;z-index:10;box-shadow:0 -2px 12px rgba(0,0,0,.04);}
+.bottombar .nav-item{flex:1;text-align:center;padding:8px 2px 6px;font-size:9px;color:var(--text2);cursor:pointer;transition:all .2s;}
+.bottombar .nav-item.active{color:var(--pink);}
+.bottombar .nav-icon{font-size:20px;display:block;margin-bottom:1px;}
+
+/* 日志 */
+.log-list{list-style:none;font-size:12px;}
+.log-item{padding:6px 10px;background:#f8f0f4;border-radius:8px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+.log-item .log-time{color:var(--text2);font-size:10px;}
+
+/* 自定义任务 */
+.custom-tasks input{width:100%;background:#f8f0f4;border:1px solid var(--pink2);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px;margin-bottom:6px;outline:none;}
+.custom-tasks input:focus{border-color:var(--pink);}
+
+.learn-poem-line{cursor:pointer;transition:all .15s;border-radius:4px;padding:1px 4px;display:inline;}
+.learn-poem-line:active{background:var(--pink3);}
+</style>
+</head>
+<body>
+
+<div class="topbar" id="topbar">
+  <div class="academy-name">✨ GIRL'S ACADEMY</div>
+  <h1>💖 元气少女养成学院</h1>
+  <div class="player-bar">
+    <span>🎀 昵称：<input id="playerName" placeholder="输入昵称" onchange="save()"></span>
+    <span>⭐ Lv.<b id="girlLevel">1</b></span>
+    <span>📅 <span id="todayDate"></span></span>
+  </div>
+</div>
+
+<div class="girl-card">
+  <div class="girl-avatar" id="girlAvatar">👧</div>
+  <div class="girl-info">
+    <div class="girl-name" id="girlNameDisplay">元气少女</div>
+    <div class="girl-level" id="girlTitle">🌟 见习学员</div>
+    <div class="girl-attr">
+      <div class="attr-row"><span class="attr-icon">📖</span><span style="font-size:10px;">智慧</span><div class="attr-bar-wrap"><div class="attr-bar-fill" id="wisBar" style="width:20%;background:var(--wisdom);"></div></div></div>
+      <div class="attr-row"><span class="attr-icon">💪</span><span style="font-size:10px;">体力</span><div class="attr-bar-wrap"><div class="attr-bar-fill" id="vitBar" style="width:20%;background:var(--vitality);"></div></div></div>
+      <div class="attr-row"><span class="attr-icon">💄</span><span style="font-size:10px;">颜值</span><div class="attr-bar-wrap"><div class="attr-bar-fill" id="beauBar" style="width:20%;background:var(--pink);"></div></div></div>
+      <div class="attr-row"><span class="attr-icon">🎨</span><span style="font-size:10px;">才艺</span><div class="attr-bar-wrap"><div class="attr-bar-fill" id="talBar" style="width:20%;background:var(--talent);"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="star-bar">
+  <span class="star-icon">⭐</span>
+  <span class="star-val" id="starVal">0</span>
+  <span class="star-label">星光币</span>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="tab active" data-tab="tasks"><span class="tabicon">📝</span>学习任务</div>
+  <div class="tab" data-tab="shop"><span class="tabicon">🛍️</span>少女商城</div>
+  <div class="tab" data-tab="enhance"><span class="tabicon">💖</span>属性养成</div>
+  <div class="tab" data-tab="settle"><span class="tabicon">📊</span>每日结算</div>
+  <div class="tab" data-tab="learn"><span class="tabicon">📖</span>学习素材</div>
+</div>
+
+<div class="panel active" id="panel-tasks">
+  <div class="section-title">📖 语文任务 <span class="badge badge-basic">必做</span></div>
+  <ul class="task-list" id="chineseTasks"></ul>
+  <div class="section-title">🔢 数学任务 <span class="badge badge-basic">必做</span></div>
+  <ul class="task-list" id="mathTasks"></ul>
+  <div class="section-title">🌍 英语任务 <span class="badge badge-basic">必做</span></div>
+  <ul class="task-list" id="englishTasks"></ul>
+  <div class="section-title">🔥 进阶挑战 <span class="badge badge-adv">挑战</span></div>
+  <ul class="task-list" id="advTasks"></ul>
+  <div class="section-title">✨ 彩蛋奖励</div>
+  <div class="task-item" id="bonusTask" onclick="openBonusModal()">
+    <div class="status-icon" id="bonusIcon"></div>
+    <div class="task-info"><div class="tname">学习态度满分·专注认真</div><div class="tstatus" id="bonusStatus"></div></div>
+    <div class="task-coin">+5</div><div class="arrow">›</div>
+  </div>
+  <div class="section-title">✏️ 自定义任务 <span class="badge badge-custom">家长增删</span></div>
+  <div class="custom-tasks" id="customTasks"></div>
+  <button class="btn btn-pink btn-block btn-sm" onclick="addCustomTask()" style="margin-top:6px;">＋ 添加自定义任务</button>
+</div>
+
+<div class="panel" id="panel-shop">
+  <div class="section-title">🛍️ 少女商城（永久拥有）</div>
+  <div class="shop-grid" id="shopGrid"></div>
+</div>
+
+<div class="panel" id="panel-enhance">
+  <div class="section-title">💖 属性养成</div>
+  <div class="enhance-grid">
+    <div class="enhance-item"><div class="eicon">📖</div><div class="ecoin">30 星光币</div><div class="eeffect">智慧 <b>+10</b></div><button class="btn btn-purple btn-sm" onclick="enhanceAttr('wisdom')">✨ 学习</button></div>
+    <div class="enhance-item"><div class="eicon">💪</div><div class="ecoin">30 星光币</div><div class="eeffect">体力 <b>+10</b></div><button class="btn btn-pink btn-sm" onclick="enhanceAttr('vitality')">🏃 锻炼</button></div>
+    <div class="enhance-item"><div class="eicon">💄</div><div class="ecoin">40 星光币</div><div class="eeffect">颜值 <b>+10</b></div><button class="btn btn-pink btn-sm" onclick="enhanceAttr('beauty')">💅 打扮</button></div>
+    <div class="enhance-item"><div class="eicon">🎨</div><div class="ecoin">40 星光币</div><div class="eeffect">才艺 <b>+10</b></div><button class="btn btn-purple btn-sm" onclick="enhanceAttr('talent')">🎵 练习</button></div>
+  </div>
+  <div style="margin-top:12px;background:#f8f0f4;border-radius:12px;padding:12px;text-align:center;font-size:12px;color:var(--text2);">
+    💡 属性越高 → 少女等级越高 → 解锁新称号和新头像！
+  </div>
+</div>
+
+<div class="panel" id="panel-settle">
+  <div class="section-title">📊 每日结算</div>
+  <div class="settle-card"><div class="stitle">📋 今日战报</div><div class="sdesc" id="todaySummary">等待结算…</div></div>
+  <div class="settle-card">
+    <div class="stitle">⚡ 惩罚机制</div>
+    <div class="sdesc">• 任意必做任务未完成 → 扣除 <b style="color:var(--pink);">20 星光币</b><br>• 全部放弃 → 扣除 <b style="color:var(--pink);">50 星光币 + 属性下降</b></div>
+    <div class="sactions">
+      <button class="btn btn-pink btn-sm" onclick="applyPenalty('single')">⚡ 单项未完成 -20</button>
+      <button class="btn btn-pink btn-sm" onclick="applyPenalty('all')">💔 全部放弃 -50</button>
+    </div>
+  </div>
+  <div class="settle-card"><div class="stitle">🏆 成就</div><div class="sdesc" id="achievementStatus"></div></div>
+  <div class="settle-card"><div class="stitle">📜 记录</div><ul class="log-list" id="logList"><li class="log-item" style="color:var(--text2);">暂无记录</li></ul></div>
+  <button class="btn btn-pink btn-block" onclick="resetAll()" style="margin-top:10px;background:var(--pink3);border:1px solid var(--pink);color:var(--pink);">🔄 重置全部数据</button>
+</div>
+
+<div class="panel" id="panel-learn">
+  <div class="section-title">📖 六年级必背古诗</div>
+  <div id="poemList"></div>
+  <div class="section-title" style="margin-top:14px;">🌍 六年级英语单词</div>
+  <div id="wordList"></div>
+</div>
+
+<div class="modal-overlay" id="taskModal" style="display:none;" onclick="if(event.target===this)closeModal()">
+  <div class="modal-sheet" id="modalContent"></div>
+</div>
+
+<div class="modal-overlay" id="victoryOverlay" style="display:none;" onclick="if(event.target===this)closeVictory()">
+  <div class="victory-box">
+    <div class="v-icon">🏆</div>
+    <h2>🎉 全部任务完成！</h2>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:8px;">元气少女，你今天太棒了！</div>
+    <div class="v-reward">
+      <div class="v-reward-icon">🎁</div>
+      <div class="v-reward-text"><b>奖励解锁：自由时间</b><br><span style="font-size:18px;font-weight:900;color:var(--pink);">30 分钟自由活动</span></div>
+    </div>
+    <div class="v-timer" id="gameTimer">⏱️ 00:00</div>
+    <div class="v-actions">
+      <button class="btn btn-pink btn-lg" onclick="startGameTime()" id="startGameBtn">🎀 开始自由时间</button>
+      <button class="btn btn-sm" onclick="closeVictory()" style="margin-top:6px;background:var(--pink3);color:var(--pink);">先看看，待会再玩</button>
+    </div>
+    <div class="v-tip">💡 倒计时结束会提醒你哦～</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="bottombar" id="bottombar">
+  <div class="nav-item active" data-tab="tasks"><span class="nav-icon">📝</span>任务</div>
+  <div class="nav-item" data-tab="shop"><span class="nav-icon">🛍️</span>商城</div>
+  <div class="nav-item" data-tab="enhance"><span class="nav-icon">💖</span>养成</div>
+  <div class="nav-item" data-tab="settle"><span class="nav-icon">📊</span>结算</div>
+  <div class="nav-item" data-tab="learn"><span class="nav-icon">📖</span>素材</div>
+</div>
+</body>
+</html>
+
+<script>
+// PWA
+if('serviceWorker' in navigator){
+  var swCode = `const CACHE_NAME='girl-academy-v1';
+self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(['/'])));self.skipWaiting();});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE_NAME).map(x=>caches.delete(x)))));self.clients.claim();});
+self.addEventListener('fetch',e=>{if(!e.request.url.startsWith(self.location.origin)||e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{if(resp&&resp.status===200){var clone=resp.clone();caches.open(CACHE_NAME).then(c=>c.put(e.request,clone));}return resp;}).catch(()=>caches.match('/'))));});`;
+  var swBlob = new Blob([swCode], {type:'application/javascript'});
+  var swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register('/sw.js').catch(function(){});
+}
+
+// 内联 manifest
+(function(){
+  var m = {"name":"元气少女养成学院","short_name":"少女学院","start_url":"/","display":"standalone","background_color":"#ffb7c5","theme_color":"#ffb7c5","icons":[{"src":"data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 192 192\'><rect width=\'192\' height=\'192\' fill=\'%23ffb7c5\' rx=\'32\'/><text x=\'96\' y=\'130\' text-anchor=\'middle\' font-size=\'100\'>💖</text></svg>","sizes":"192x192","type":"image/svg+xml"}]};
+  var blob = new Blob([JSON.stringify(m)], {type:'application/json'});
+  var link = document.querySelector('link[rel="manifest"]');
+  if(!link){ link = document.createElement('link'); link.rel = 'manifest'; document.head.appendChild(link); }
+  link.href = URL.createObjectURL(blob);
+})();
+
+// ============ 数据模型 ============
+var TASKS_CHINESE = [
+  {id:'c1',name:'📖 背诵古诗 1 首',coin:5,type:'poem'},
+  {id:'c2',name:'✏️ 生字词语抄写 15 个',coin:5,type:'chars'},
+];
+var TASKS_MATH = [
+  {id:'m1',name:'🔢 分数/小数计算 15 题',coin:5,type:'math'},
+  {id:'m2',name:'📐 应用题练习 5 题',coin:5,type:'math'},
+];
+var TASKS_ENGLISH = [
+  {id:'e1',name:'🌍 英语单词背诵 10 个',coin:5,type:'english'},
+  {id:'e2',name:'📝 英语句子朗读 5 句',coin:5,type:'english'},
+];
+var TASKS_ADV = [
+  {id:'a1',name:'📜 古诗背诵 + 默写',coin:10,type:'poem'},
+  {id:'a2',name:'🌍 英语单词听写 15 个',coin:8,type:'english'},
+  {id:'a3',name:'🔢 数学综合卷 1 套',coin:10,type:'math'},
+];
+var ALL_BASIC = TASKS_CHINESE.concat(TASKS_MATH).concat(TASKS_ENGLISH);
+
+var SHOP_ITEMS = [
+  {id:'dress1',name:'🌸 樱花连衣裙',effect:'颜值 +5',price:30,icon:'👗',attr:'beauty',bonus:5},
+  {id:'dress2',name:'✨ 星空礼服',effect:'颜值 +10',price:60,icon:'👗',attr:'beauty',bonus:10},
+  {id:'dress3',name:'👑 公主皇冠',effect:'颜值 +15',price:100,icon:'👑',attr:'beauty',bonus:15},
+  {id:'book1',name:'📚 智慧之书',effect:'智慧 +5',price:30,icon:'📚',attr:'wisdom',bonus:5},
+  {id:'book2',name:'🔮 魔法词典',effect:'智慧 +10',price:60,icon:'🔮',attr:'wisdom',bonus:10},
+  {id:'sport1',name:'🎀 运动发带',effect:'体力 +5',price:25,icon:'🎀',attr:'vitality',bonus:5},
+  {id:'sport2',name:'🩰 芭蕾舞鞋',effect:'体力 +10 才艺 +5',price:70,icon:'🩰',attr:'vitality',bonus:10,attr2:'talent',bonus2:5},
+  {id:'art1',name:'🎹 迷你钢琴',effect:'才艺 +10',price:60,icon:'🎹',attr:'talent',bonus:10},
+  {id:'art2',name:'🎨 画架套装',effect:'才艺 +15',price:100,icon:'🎨',attr:'talent',bonus:15},
+  {id:'pet1',name:'🐱 小猫咪',effect:'每天 +3 星光币',price:80,icon:'🐱',attr:'daily',bonus:3},
+];
+
+var POEMS = [{"title": "宿建德江", "author": "孟浩然", "lines": ["移舟泊烟渚，日暮客愁新。", "野旷天低树，江清月近人。"], "pinyin": ["yí zhōu bó yān zhǔ", "rì mù kè chóu xīn", "yě kuàng tiān dī shù", "jiāng qīng yuè jìn rén"]}, {"title": "六月二十七日望湖楼醉书", "author": "苏轼", "lines": ["黑云翻墨未遮山，白雨跳珠乱入船。", "卷地风来忽吹散，望湖楼下水如天。"], "pinyin": ["hēi yún fān mò wèi zhē shān", "bái yǔ tiào zhū luàn rù chuán", "juǎn dì fēng lái hū chuī sàn", "wàng hú lóu xià shuǐ rú tiān"]}, {"title": "西江月·夜行黄沙道中", "author": "辛弃疾", "lines": ["明月别枝惊鹊，清风半夜鸣蝉。", "稻花香里说丰年，听取蛙声一片。"], "pinyin": ["míng yuè bié zhī jīng què", "qīng fēng bàn yè míng chán", "dào huā xiāng lǐ shuō fēng nián", "tīng qǔ wā shēng yī piàn"]}, {"title": "浪淘沙", "author": "刘禹锡", "lines": ["九曲黄河万里沙，浪淘风簸自天涯。", "如今直上银河去，同到牵牛织女家。"], "pinyin": ["jiǔ qū huáng hé wàn lǐ shā", "làng táo fēng bǒ zì tiān yá", "rú jīn zhí shàng yín hé qù", "tóng dào qiān niú zhī nǚ jiā"]}, {"title": "江南春", "author": "杜牧", "lines": ["千里莺啼绿映红，水村山郭酒旗风。", "南朝四百八十寺，多少楼台烟雨中。"], "pinyin": ["qiān lǐ yīng tí lǜ yìng hóng", "shuǐ cūn shān guō jiǔ qí fēng", "nán cháo sì bǎi bā shí sì", "duō shǎo lóu tái yān yǔ zhōng"]}, {"title": "书湖阴先生壁", "author": "王安石", "lines": ["茅檐长扫净无苔，花木成畦手自栽。", "一水护田将绿绕，两山排闼送青来。"], "pinyin": ["máo yán cháng sǎo jìng wú tái", "huā mù chéng qí shǒu zì zāi", "yī shuǐ hù tián jiāng lǜ rào", "liǎng shān pái tà sòng qīng lái"]}];
+var ENGLISH_WORDS = [{"en": "science", "zh": "科学"}, {"en": "museum", "zh": "博物馆"}, {"en": "bookstore", "zh": "书店"}, {"en": "cinema", "zh": "电影院"}, {"en": "hospital", "zh": "医院"}, {"en": "crossing", "zh": "十字路口"}, {"en": "turn left", "zh": "左转"}, {"en": "turn right", "zh": "右转"}, {"en": "go straight", "zh": "直走"}, {"en": "by bus", "zh": "乘公交"}, {"en": "by subway", "zh": "乘地铁"}, {"en": "on foot", "zh": "步行"}, {"en": "slow down", "zh": "减速"}, {"en": "traffic lights", "zh": "交通灯"}, {"en": "post office", "zh": "邮局"}, {"en": "dictionary", "zh": "词典"}, {"en": "comic book", "zh": "漫画书"}, {"en": "word book", "zh": "单词书"}, {"en": "postcard", "zh": "明信片"}, {"en": "pizza", "zh": "披萨"}, {"en": "street", "zh": "街道"}, {"en": "get to", "zh": "到达"}, {"en": "far", "zh": "远的"}, {"en": "tell", "zh": "告诉"}, {"en": "follow", "zh": "跟着"}, {"en": "feature", "zh": "特点"}, {"en": "attention", "zh": "注意"}, {"en": "travel", "zh": "旅行"}, {"en": "price", "zh": "价格"}, {"en": "half", "zh": "一半"}];
+var CHARS_6 = [
+  {char:'德',pinyin:'dé',words:'品德、道德'},{char:'建',pinyin:'jiàn',words:'建设、建筑'},{char:'泊',pinyin:'bó',words:'停泊、泊船'},
+  {char:'烟',pinyin:'yān',words:'烟雾、烟渚'},{char:'愁',pinyin:'chóu',words:'忧愁、愁苦'},{char:'旷',pinyin:'kuàng',words:'空旷、旷野'},
+  {char:'翻',pinyin:'fān',words:'翻墨、翻滚'},{char:'墨',pinyin:'mò',words:'墨水、墨汁'},{char:'遮',pinyin:'zhē',words:'遮挡、遮蔽'},
+  {char:'散',pinyin:'sàn',words:'分散、吹散'},{char:'鹊',pinyin:'què',words:'喜鹊、惊鹊'},{char:'蝉',pinyin:'chán',words:'鸣蝉、蝉鸣'},
+  {char:'稻',pinyin:'dào',words:'稻田、稻花'},{char:'丰',pinyin:'fēng',words:'丰收、丰年'},{char:'蛙',pinyin:'wā',words:'青蛙、蛙声'},
+  {char:'淘',pinyin:'táo',words:'浪淘、淘气'},{char:'簸',pinyin:'bǒ',words:'颠簸、风簸'},{char:'涯',pinyin:'yá',words:'天涯、生涯'},
+  {char:'莺',pinyin:'yīng',words:'黄莺、莺啼'},{char:'郭',pinyin:'guō',words:'城郭、山郭'},
+];
+
+// ============ 状态 ============
+var STORAGE_KEY = 'girl_academy_v1';
+var today = new Date().toISOString().slice(0,10);
+var PARENT_CODE = '2024';
+
+function defaultState(){
+  return {
+    playerName:'',coins:0,wisdom:20,vitality:20,beauty:20,talent:20,
+    doneTasks:{},customTasks:[],bonusDone:false,ownedItems:{},
+    lastDate:today,logs:[],todayPoemIdx:{},
+  };
+}
+var state = defaultState();
+
+function load(){
+  try{ var raw=localStorage.getItem(STORAGE_KEY); if(raw) state=Object.assign(defaultState(),JSON.parse(raw)); }catch(e){}
+  if(state.lastDate!==today){
+    state.doneTasks={}; state.bonusDone=false; state.lastDate=today; state.todayPoemIdx={};
+    save();
+  }
+  seedToday(); updateAll();
+}
+
+function save(){ state.lastDate=today; localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }
+
+function seedToday(){
+  if(Object.keys(state.todayPoemIdx).length>0) return;
+  var d=parseInt(today.replace(/-/g,''));
+  state.todayPoemIdx['c1']=d%POEMS.length;
+  state.todayPoemIdx['a1']=(d+1)%POEMS.length;
+  save();
+}
+
+function addLog(msg){
+  var now=new Date(); var time=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  state.logs.unshift({msg:msg,time:time}); if(state.logs.length>50) state.logs.length=50;
+  save(); renderLogs();
+}
+
+function getLevel(){
+  var total=state.wisdom+state.vitality+state.beauty+state.talent;
+  if(total>=400) return {level:5,title:'👑 皇家学员',avatar:'👸'};
+  if(total>=300) return {level:4,title:'💎 钻石学员',avatar:'💃'};
+  if(total>=200) return {level:3,title:'🌟 明星学员',avatar:'👧'};
+  if(total>=120) return {level:2,title:'🌱 成长学员',avatar:'🙋'};
+  return {level:1,title:'🌸 见习学员',avatar:'👧'};
+}
+
+// ============ 任务弹窗 ============
+var currentTaskId=null, currentTaskCoin=0, currentIsBasic=false;
+
+function openTaskModal(taskId,coin,isBasic,type){
+  if(state.doneTasks[taskId+'_'+today]){ showDoneModal(taskId,coin); return; }
+  currentTaskId=taskId; currentTaskCoin=coin; currentIsBasic=isBasic;
+  var html='';
+  if(type==='poem'){
+    var idx=state.todayPoemIdx[taskId]||(parseInt(today.replace(/-/g,''))%POEMS.length);
+    var p=POEMS[idx];
+    html='<div class="mheader"><div class="mtitle">📖 今日古诗 <span style="font-size:11px;color:var(--purple);">🔊 点击朗读</span></div><button class="mclose" onclick="closeModal()">✕</button></div>'+
+      '<div class="content-card"><div class="cc-title" onclick="speak(''+p.title+'')" style="cursor:pointer;">'+p.title+' · '+p.author+'</div>'+
+      p.lines.map(function(l,i){return '<div class="cc-body" style="cursor:pointer;line-height:2.2;" onclick="speak(''+l.replace(/'/g,"\\'")+'')">'+l+'<span style="font-size:10px;color:#c9a0dc;display:block;">'+p.pinyin[i]+'</span></div>';}).join('')+
+      '<button class="btn btn-purple btn-sm" onclick="speakAll(''+p.title+'',''+JSON.stringify(p.lines).replace(/'/g,"\\'")+'')" style="margin-top:8px;">🔊 全文朗读</button>'+
+      '</div><div class="modal-hint">👩‍👧 <b>家长引导</b>：让孩子朗读并背诵古诗。背熟后输入密码确认。</div>'+confirmHTML('背诵完成');
+  }else if(type==='chars'){
+    var chars=CHARS_6.slice(0,15);
+    html='<div class="mheader"><div class="mtitle">✏️ 生字词语 <span style="font-size:11px;color:var(--purple);">🔊 点读</span></div><button class="mclose" onclick="closeModal()">✕</button></div>'+
+      '<div class="char-grid">'+chars.map(function(c){return '<div class="char-card" onclick="speak(''+c.char+'')"><span style="font-size:10px;float:right;opacity:.5;">🔊</span><div class="big-char">'+c.char+'</div><div class="cc-pinyin">'+c.pinyin+'</div><div class="cc-words">'+c.words+'</div></div>';}).join('')+'</div>'+
+      '<div class="modal-hint">👩‍👧 <b>家长引导</b>：让孩子认读生字、说出拼音和组词。完成后输入密码确认。</div>'+confirmHTML('认读完成');
+  }else if(type==='math'){
+    var qs=genMathQs(15);
+    html='<div class="mheader"><div class="mtitle">🔢 数学练习</div><button class="mclose" onclick="closeModal()">✕</button></div>'+
+      '<div class="math-grid">'+qs.map(function(q){return '<div class="math-item">'+q+'</div>';}).join('')+'</div>'+
+      '<div class="modal-hint">👩‍👧 <b>家长引导</b>：让孩子在纸上完成计算，家长核对后输入密码确认。</div>'+confirmHTML('练习完成');
+  }else if(type==='english'){
+    var ws=ENGLISH_WORDS.slice((parseInt(today.replace(/-/g,''))+taskId.charCodeAt(0))%10,20);
+    html='<div class="mheader"><div class="mtitle">🌍 英语单词 <span style="font-size:11px;color:var(--purple);">🔊 点读</span></div><button class="mclose" onclick="closeModal()">✕</button></div>'+
+      ws.map(function(w){return '<div class="word-card" onclick="speak(''+w.en+'')"><div class="en">'+w.en+'</div><div class="zh">'+w.zh+'</div></div>';}).join('')+
+      '<div class="modal-hint">👩‍👧 <b>家长引导</b>：点击单词听发音，让孩子跟读并说出中文意思。完成后输入密码确认。</div>'+confirmHTML('单词完成');
+  }else{
+    html='<div class="mheader"><div class="mtitle">✅ 确认任务</div><button class="mclose" onclick="closeModal()">✕</button></div>'+
+      '<div class="modal-hint">👩‍👧 <b>家长</b>：确认孩子已完成此任务后输入密码。</div>'+confirmHTML('任务完成');
+  }
+  document.getElementById('modalContent').innerHTML=html;
+  document.getElementById('taskModal').style.display='flex';
+}
+
+function confirmHTML(label){
+  return '<div class="confirm-area"><div class="parent-check"><label>🔐 家长密码：</label><input type="password" id="parentCode" placeholder="输入密码" maxlength="6" inputmode="numeric" autocomplete="off"></div><button class="btn btn-pink btn-lg btn-block" onclick="confirmTask()">✅ '+label+' (+'+currentTaskCoin+'⭐)</button></div>';
+}
+
+function showDoneModal(taskId,coin){
+  currentTaskId=taskId; currentTaskCoin=coin;
+  document.getElementById('modalContent').innerHTML='<div class="mheader"><div class="mtitle">✅ 已完成</div><button class="mclose" onclick="closeModal()">✕</button></div><div style="text-align:center;padding:20px;font-size:40px;">✅</div><div style="text-align:center;font-size:15px;font-weight:700;color:var(--mint);margin-bottom:12px;">今日已打卡！</div><div class="confirm-area"><button class="btn btn-pink btn-block" onclick="undoTask()">🔄 撤销 (-'+coin+'⭐)</button></div>';
+  document.getElementById('taskModal').style.display='flex';
+}
+
+function confirmTask(){
+  var code=(document.getElementById('parentCode')||{}).value||'';
+  if(code!==PARENT_CODE){ toastMsg('🔐 密码错误！'); return; }
+  if(!currentTaskId) return;
+  state.doneTasks[currentTaskId+'_'+today]=true; state.coins+=currentTaskCoin;
+  addLog('✅ 完成任务 +'+currentTaskCoin+'⭐');
+  toastMsg('⭐ +'+currentTaskCoin+' 星光币！');
+  if(currentIsBasic) checkAllDone();
+  save(); updateAll(); closeModal();
+}
+
+function undoTask(){
+  var code=prompt('🔐 家长密码：'); if(code!==PARENT_CODE){ toastMsg('密码错误！'); return; }
+  if(!currentTaskId) return;
+  delete state.doneTasks[currentTaskId+'_'+today]; state.coins-=currentTaskCoin;
+  addLog('🔙 撤销 -'+currentTaskCoin+'⭐');
+  save(); updateAll(); closeModal();
+}
+
+function closeModal(){ document.getElementById('taskModal').style.display='none'; currentTaskId=null; }
+
+// ============ 彩蛋 ============
+function openBonusModal(){
+  if(state.bonusDone){
+    document.getElementById('modalContent').innerHTML='<div class="mheader"><div class="mtitle">✨ 彩蛋已领取</div><button class="mclose" onclick="closeModal()">✕</button></div><div style="text-align:center;padding:20px;font-size:40px;">✨</div><div style="text-align:center;color:var(--star);font-weight:700;">今日已领取！</div><div class="confirm-area" style="margin-top:12px;"><button class="btn btn-pink btn-block" onclick="undoBonus()">🔄 撤销 (-5⭐)</button></div>';
+    document.getElementById('taskModal').style.display='flex'; return;
+  }
+  document.getElementById('modalContent').innerHTML='<div class="mheader"><div class="mtitle">✨ 彩蛋奖励</div><button class="mclose" onclick="closeModal()">✕</button></div><div class="modal-hint">👩‍👧 <b>家长判定</b>：孩子学习态度满分、专注认真，即可发放。</div><div class="confirm-area"><div class="parent-check"><label>🔐 家长密码：</label><input type="password" id="parentCode" placeholder="输入密码" maxlength="6" inputmode="numeric" autocomplete="off"></div><button class="btn btn-pink btn-lg btn-block" onclick="confirmBonus()">✨ 确认发放 (+5⭐)</button></div>';
+  document.getElementById('taskModal').style.display='flex';
+}
+
+function confirmBonus(){
+  var code=(document.getElementById('parentCode')||{}).value||''; if(code!==PARENT_CODE){ toastMsg('🔐 密码错误！'); return; }
+  state.bonusDone=true; state.coins+=5; addLog('✨ 彩蛋 +5⭐'); toastMsg('✨ 彩蛋 +5⭐！');
+  save(); updateAll(); closeModal();
+}
+
+function undoBonus(){
+  var code=prompt('🔐 家长密码：'); if(code!==PARENT_CODE){ toastMsg('密码错误！'); return; }
+  state.bonusDone=false; state.coins-=5; addLog('🔙 撤销彩蛋 -5⭐');
+  save(); updateAll(); closeModal();
+}
+
+// ============ 自定义任务 ============
+function addCustomTask(){
+  var name=prompt('任务名称：'); if(!name||!name.trim()) return;
+  var coin=parseInt(prompt('奖励星光币：','5')); if(isNaN(coin)||coin<1) return;
+  state.customTasks.push({id:'x'+Date.now(),name:name.trim(),coin:coin,type:'custom'});
+  save(); updateAll();
+}
+function removeCustomTask(idx){ state.customTasks.splice(idx,1); save(); updateAll(); }
+
+// ============ 口算题 ============
+function seededRandom(seed){ var s=seed; return function(){ s=(s*9301+49297)%233280; return s/233280; }; }
+function genMathQs(n){
+  var rng=seededRandom(parseInt(today.replace(/-/g,''))+200);
+  var qs=[];
+  for(var i=0;i<n;i++){
+    var type=Math.floor(rng()*4);
+    if(type===0){ var a=Math.floor(rng()*20)+5,b=Math.floor(rng()*20)+5; qs.push(a+' + '+b+' = ___'); }
+    else if(type===1){ var a=Math.floor(rng()*30)+10,b=Math.floor(rng()*15)+5; qs.push(a+' - '+b+' = ___'); }
+    else if(type===2){ var a=Math.floor(rng()*9)+2,b=Math.floor(rng()*9)+2; qs.push(a+' × '+b+' = ___'); }
+    else{ var b=Math.floor(rng()*8)+2,q=Math.floor(rng()*8)+2; qs.push((b*q)+' ÷ '+b+' = ___'); }
+  }
+  return qs;
+}
+
+// ============ 商城 & 养成 ============
+function buyItem(itemId){
+  var item=SHOP_ITEMS.find(function(i){return i.id===itemId;});
+  if(!item) return;
+  if(state.ownedItems[itemId]){ toastMsg('已拥有！'); return; }
+  if(state.coins<item.price){ toastMsg('星光币不足！需要 '+item.price+'⭐'); return; }
+  state.coins-=item.price; state.ownedItems[itemId]=true;
+  state[item.attr]=(state[item.attr]||0)+item.bonus;
+  if(item.attr2) state[item.attr2]=(state[item.attr2]||0)+item.bonus2;
+  addLog('🛍️ 获得 '+item.name+'！');
+  toastMsg('🎉 获得 '+item.name+'！');
+  save(); updateAll();
+}
+
+function enhanceAttr(attr){
+  var costs={wisdom:30,vitality:30,beauty:40,talent:40};
+  var cost=costs[attr]||30;
+  if(state.coins<cost){ toastMsg('星光币不足！需要 '+cost+'⭐'); return; }
+  state.coins-=cost; state[attr]=(state[attr]||0)+10;
+  var names={wisdom:'智慧',vitality:'体力',beauty:'颜值',talent:'才艺'};
+  addLog('💖 '+names[attr]+' +10！');
+  toastMsg('💖 '+names[attr]+' 提升！');
+  save(); updateAll();
+}
+
+function applyPenalty(type){
+  var cost=type==='single'?20:50;
+  state.coins=Math.max(0,state.coins-cost);
+  addLog('⚡ 惩罚：-'+cost+'⭐');
+  if(type==='all'){ state.wisdom=Math.max(0,state.wisdom-5); state.beauty=Math.max(0,state.beauty-5); }
+  toastMsg('💔 扣除 '+cost+' 星光币');
+  save(); updateAll();
+}
+
+function checkAllDone(){
+  var allDone=ALL_BASIC.every(function(t){return state.doneTasks[t.id+'_'+today];});
+  if(allDone) showVictoryModal();
+}
+
+function resetAll(){
+  if(!confirm('确定重置全部数据？')) return;
+  localStorage.removeItem(STORAGE_KEY); state=defaultState(); addLog('🔄 已重置'); updateAll();
+}
+
+// ============ 胜利弹窗 ============
+var gameTimerInterval=null, gameSeconds=0;
+
+function showVictoryModal(){
+  document.getElementById('victoryOverlay').style.display='flex';
+  addLog('🏆 全部任务完成！');
+  toastMsg('🏆 全部完成！元气少女太厉害了！');
+}
+
+function startGameTime(){
+  document.getElementById('startGameBtn').style.display='none';
+  gameSeconds=30*60; updateGameTimer();
+  gameTimerInterval=setInterval(function(){
+    gameSeconds--; updateGameTimer();
+    if(gameSeconds<=0){ clearInterval(gameTimerInterval); showGameOver(); }
+  },1000);
+  toastMsg('🎀 自由时间开始！');
+}
+
+function updateGameTimer(){
+  var m=Math.floor(gameSeconds/60),s=gameSeconds%60;
+  var el=document.getElementById('gameTimer');
+  el.textContent='⏱️ '+m.toString().padStart(2,'0')+':'+s.toString().padStart(2,'0');
+  if(gameSeconds<=60) el.classList.add('running');
+}
+
+function showGameOver(){
+  document.getElementById('modalContent').innerHTML='<div style="text-align:center;padding:20px;"><div style="font-size:48px;">⏰</div><h3 style="color:var(--pink);margin:10px 0;">自由时间结束！</h3><p style="color:var(--text2);">30 分钟已到，明天继续加油哦～</p><button class="btn btn-pink" onclick="closeModal()">👍 知道啦</button></div>';
+  document.getElementById('taskModal').style.display='flex';
+  document.getElementById('victoryOverlay').style.display='none';
+  addLog('⏰ 自由时间结束');
+}
+
+function closeVictory(){
+  if(gameTimerInterval){ if(!confirm('自由时间还在进行，确定关闭？')) return; clearInterval(gameTimerInterval); }
+  document.getElementById('victoryOverlay').style.display='none';
+  document.getElementById('startGameBtn').style.display='inline-block';
+  gameSeconds=0; document.getElementById('gameTimer').textContent='⏱️ 00:00';
+  document.getElementById('gameTimer').classList.remove('running');
+}
+
+// ============ 语音 ============
+var speechSynth=window.speechSynthesis, cachedVoice=null;
+function getMandarinVoice(){
+  if(cachedVoice) return cachedVoice;
+  var voices=speechSynth.getVoices();
+  var v=voices.find(function(v){return v.lang==='zh-CN';})||voices.find(function(v){return v.lang.indexOf('zh-CN')===0;})||voices.find(function(v){return v.lang.indexOf('zh')===0&&v.lang.indexOf('HK')===-1;});
+  if(v) cachedVoice=v; return v;
+}
+function speak(text){
+  if(!speechSynth) return;
+  speechSynth.cancel();
+  var u=new SpeechSynthesisUtterance(text); u.lang='zh-CN'; u.rate=0.85;
+  var mv=getMandarinVoice(); if(mv) u.voice=mv;
+  speechSynth.speak(u);
+}
+function speakAll(title,linesJson){
+  if(!speechSynth) return;
+  speechSynth.cancel();
+  var lines; try{ lines=JSON.parse(linesJson); }catch(e){ lines=[title]; }
+  var u=new SpeechSynthesisUtterance(title+'。'+lines.join('。')); u.lang='zh-CN'; u.rate=0.8;
+  var mv=getMandarinVoice(); if(mv) u.voice=mv;
+  speechSynth.speak(u);
+}
+if(speechSynth){ speechSynth.getVoices(); speechSynth.onvoiceschanged=function(){ cachedVoice=null; speechSynth.getVoices(); }; }
+
+// ============ 渲染 ============
+function updateAll(){
+  document.getElementById('starVal').textContent=state.coins;
+  document.getElementById('todayDate').textContent=today;
+  document.getElementById('playerName').value=state.playerName;
+  document.getElementById('girlNameDisplay').textContent=state.playerName||'元气少女';
+  var lv=getLevel();
+  document.getElementById('girlLevel').textContent=lv.level;
+  document.getElementById('girlTitle').textContent=lv.title;
+  document.getElementById('girlAvatar').textContent=lv.avatar;
+  document.getElementById('wisBar').style.width=Math.min(100,state.wisdom/3)+'%';
+  document.getElementById('vitBar').style.width=Math.min(100,state.vitality/3)+'%';
+  document.getElementById('beauBar').style.width=Math.min(100,state.beauty/3)+'%';
+  document.getElementById('talBar').style.width=Math.min(100,state.talent/3)+'%';
+  renderTasks(); renderShop(); renderCustomTasks(); renderPoems(); renderWords(); renderSummary(); renderAchievement(); renderLogs();
+}
+
+function renderTasks(){
+  document.getElementById('chineseTasks').innerHTML=TASKS_CHINESE.map(function(t){ return taskHTML(t,true); }).join('');
+  document.getElementById('mathTasks').innerHTML=TASKS_MATH.map(function(t){ return taskHTML(t,true); }).join('');
+  document.getElementById('englishTasks').innerHTML=TASKS_ENGLISH.map(function(t){ return taskHTML(t,true); }).join('');
+  document.getElementById('advTasks').innerHTML=TASKS_ADV.map(function(t){ return taskHTML(t,false); }).join('');
+  document.getElementById('bonusIcon').textContent=state.bonusDone?'✓':'';
+  if(state.bonusDone){ document.getElementById('bonusTask').classList.add('done'); document.getElementById('bonusStatus').textContent='✨ 已领取'; document.getElementById('bonusStatus').className='tstatus ok'; }
+  else{ document.getElementById('bonusTask').classList.remove('done'); document.getElementById('bonusStatus').textContent='⏳ 点击判定'; document.getElementById('bonusStatus').className='tstatus pending'; }
+}
+
+function taskHTML(t,isBasic){
+  var done=state.doneTasks[t.id+'_'+today];
+  return '<li class="task-item'+(done?' done':'')+'" onclick="openTaskModal(''+t.id+'','+t.coin+','+isBasic+',''+t.type+'')"><div class="status-icon">'+(done?'✓':'')+'</div><div class="task-info"><div class="tname">'+t.name+'</div><div class="tstatus '+(done?'ok':'pending')+'">'+(done?'✅ 已完成':'⏳ 点击进入')+'</div></div><div class="task-coin">+'+t.coin+'⭐</div><div class="arrow">›</div></li>';
+}
+
+function renderCustomTasks(){
+  document.getElementById('customTasks').innerHTML=state.customTasks.map(function(t,i){
+    var done=state.doneTasks[t.id+'_'+today];
+    return '<div class="task-item'+(done?' done':'')+'" style="display:flex;align-items:center;gap:8px;" onclick="openTaskModal(''+t.id+'','+t.coin+',false,'custom')"><div class="status-icon">'+(done?'✓':'')+'</div><div class="task-info"><div class="tname">'+t.name+'</div><div class="tstatus '+(done?'ok':'pending')+'">'+(done?'✅':'⏳')+'</div></div><div class="task-coin">+'+t.coin+'⭐</div><span onclick="event.stopPropagation();removeCustomTask('+i+')" style="color:var(--pink);cursor:pointer;">✕</span></div>';
+  }).join('');
+}
+
+function renderShop(){
+  document.getElementById('shopGrid').innerHTML=SHOP_ITEMS.map(function(item){
+    var owned=state.ownedItems[item.id];
+    return '<div class="shop-item'+(owned?' owned':'')+'"><div class="sicon">'+item.icon+'</div><div class="sname">'+item.name+'</div><div class="seffect">'+item.effect+'</div><div class="sprice">'+item.price+'⭐</div>'+(owned?'<div style="color:var(--mint);font-weight:700;font-size:11px;">✅ 已拥有</div>':'<button class="btn btn-pink buy-btn" onclick="event.stopPropagation();buyItem(''+item.id+'')">🛍️ 购买</button>')+'</div>';
+  }).join('');
+}
+
+function renderPoems(){
+  var html='';
+  POEMS.forEach(function(p){
+    html+='<div style="background:var(--card);border-radius:10px;padding:10px;margin-bottom:6px;box-shadow:0 2px 8px rgba(0,0,0,.03);"><div style="font-weight:700;color:var(--pink);margin-bottom:4px;cursor:pointer;" onclick="speak(''+p.title+'')">🔊 '+p.title+' · '+p.author+'</div><div style="font-size:13px;line-height:2.2;">'+p.lines.map(function(l){return '<span class="learn-poem-line" onclick="speak(''+l.replace(/'/g,"\\'")+'')">'+l+'</span>';}).join('<br>')+'<br><button class="btn btn-purple btn-sm" style="margin-top:4px;font-size:10px;padding:3px 10px;" onclick="speakAll(''+p.title+'',''+JSON.stringify(p.lines).replace(/'/g,"\\'")+'')">🔊 全文朗读</button></div></div>';
+  });
+  document.getElementById('poemList').innerHTML=html;
+}
+
+function renderWords(){
+  var html='';
+  ENGLISH_WORDS.forEach(function(w){
+    html+='<div class="word-card" style="display:inline-block;margin:3px;cursor:pointer;" onclick="speak(''+w.en+'')"><div class="en">'+w.en+'</div><div class="zh">'+w.zh+'</div></div>';
+  });
+  document.getElementById('wordList').innerHTML=html;
+}
+
+function renderSummary(){
+  var bd=ALL_BASIC.filter(function(t){return state.doneTasks[t.id+'_'+today];}).length;
+  var ad=TASKS_ADV.filter(function(t){return state.doneTasks[t.id+'_'+today];}).length;
+  var lv=getLevel();
+  document.getElementById('todaySummary').innerHTML='完成：必做 <b style="color:var(--pink)">'+bd+'/'+ALL_BASIC.length+'</b>，进阶 <b style="color:var(--star)">'+ad+'/'+TASKS_ADV.length+'</b><br>等级：<b>'+lv.title+'</b> ｜ 智慧'+state.wisdom+' 体力'+state.vitality+' 颜值'+state.beauty+' 才艺'+state.talent;
+}
+
+function renderAchievement(){
+  var allDone=ALL_BASIC.every(function(t){return state.doneTasks[t.id+'_'+today];});
+  var left=ALL_BASIC.filter(function(t){return !state.doneTasks[t.id+'_'+today];}).length;
+  var lv=getLevel();
+  document.getElementById('achievementStatus').innerHTML='当前：<b style="color:var(--pink);">'+lv.title+'</b> Lv.'+lv.level+'<br>'+(lv.level>=5?'<b style="color:var(--star);">🎉 最高等级！你是最棒的元气少女！</b>':'距离下一级还需属性提升')+(allDone?'<br><b style="color:var(--mint);">✅ 今日任务全部完成！</b>':'<br><b style="color:var(--pink);">⚠️ 还有 '+left+' 项必做任务未完成</b>');
+}
+
+function renderLogs(){
+  var el=document.getElementById('logList');
+  if(state.logs.length===0){ el.innerHTML='<li class="log-item" style="color:var(--text2);">暂无记录</li>'; return; }
+  el.innerHTML=state.logs.slice(0,30).map(function(l){return '<li class="log-item"><span>'+l.msg+'</span><span class="log-time">'+l.time+'</span></li>';}).join('');
+}
+
+// ============ 标签 & Toast ============
+function switchTab(tabName){
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('panel-'+tabName).classList.add('active');
+  var tt=document.querySelector('.tab[data-tab="'+tabName+'"]'); if(tt) tt.classList.add('active');
+  var nn=document.querySelector('.nav-item[data-tab="'+tabName+'"]'); if(nn) nn.classList.add('active');
+}
+var toastTimer;
+function toastMsg(msg){
+  var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(function(){el.classList.remove('show');},1800);
+}
+
+// ============ 事件 ============
+document.querySelectorAll('.tab').forEach(function(t){t.addEventListener('click',function(){switchTab(t.dataset.tab);});});
+document.querySelectorAll('.nav-item').forEach(function(n){n.addEventListener('click',function(){switchTab(n.dataset.tab);});});
+document.getElementById('playerName').addEventListener('input',function(){ state.playerName=this.value; save(); });
+
+load(); updateAll();
+</script>
