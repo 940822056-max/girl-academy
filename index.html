@@ -229,8 +229,32 @@ body{
 .learn-poem-line{cursor:pointer;transition:all .15s;border-radius:4px;padding:1px 4px;display:inline;}
 .learn-poem-line:active{background:var(--pink3);}
 </style>
+<style>
+.wx-guide{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.88);z-index:9999;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;}
+.wx-guide.show{display:flex;}
+.wx-guide .arrow{position:absolute;top:10px;right:20px;font-size:48px;animation:bounce 1s infinite alternate;}
+.wx-guide .arrow-path{font-size:40px;color:#4CAF50;margin-top:60px;}
+.wx-guide h2{color:#fff;font-size:20px;margin:16px 0 10px;}
+.wx-guide p{color:#ccc;font-size:14px;line-height:1.8;max-width:320px;}
+.wx-guide .steps{text-align:left;color:#ccc;font-size:13px;line-height:2.2;background:rgba(255,255,255,.08);border-radius:12px;padding:16px 20px;margin-top:10px;max-width:320px;}
+.wx-guide .steps b{color:#4CAF50;}
+@keyframes bounce{from{transform:translateY(0);}to{transform:translateY(-10px);}}
+</style>
 </head>
 <body>
+<div class="wx-guide" id="wxGuide">
+  <div class="arrow">👆</div>
+  <div class="arrow-path">🟢</div>
+  <h2>请在浏览器中打开</h2>
+  <p>微信不支持"添加到主屏幕"功能<br>需要在手机浏览器中打开才能添加</p>
+  <div class="steps">
+    <b>操作步骤：</b><br>
+    1️⃣ 点击右上角 <b>···</b> 三个点<br>
+    2️⃣ 选择 <b>"在浏览器中打开"</b><br>
+    3️⃣ 在浏览器里再次点 <b>···</b><br>
+    4️⃣ 选择 <b>"添加到主屏幕"</b>
+  </div>
+</div>
 
 <div class="topbar" id="topbar">
   <div class="academy-name">✨ GIRL'S ACADEMY</div>
@@ -827,6 +851,13 @@ function switchTab(tabName){
   var tt=document.querySelector('.tab[data-tab="'+tabName+'"]'); if(tt) tt.classList.add('active');
   var nn=document.querySelector('.nav-item[data-tab="'+tabName+'"]'); if(nn) nn.classList.add('active');
 }
+// 微信检测
+(function(){
+  var ua=navigator.userAgent.toLowerCase();
+  if(ua.indexOf('micromessenger')>-1 || ua.indexOf('weixin')>-1){
+    document.getElementById('wxGuide').classList.add('show');
+  }
+})();
 var toastTimer;
 function toastMsg(msg){
   var el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show');
